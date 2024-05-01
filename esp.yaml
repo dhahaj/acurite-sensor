@@ -1,0 +1,49 @@
+esphome:
+  name: rf_sensor
+  friendly_name: Accurite Temperature Decoder
+  platform: ESP8266
+  board: esp01_1m
+  includes: 
+    - components/rfsensor
+  on_boot: 
+    then:
+      - delay: 4s
+      - wifi.enable: 
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  manual_ip: 
+    static_ip: 192.168.1.137
+    gateway: 192.168.1.254
+    subnet: 255.255.255.0
+    dns1: 192.168.1.254
+    dns2: 0.0.0.0
+  enable_on_boot: False
+  
+logger:
+  # level: DEBUG
+api:
+ota:
+
+external_components:
+  - source: 
+      type: local
+      path: components
+
+sensor:
+  - platform: custom
+    lambda: |-
+      auto my_sensor = new RFSensor();
+      App.register_component(my_sensor);
+      return {my_sensor->temperature_sensor, my_sensor->humidity_sensor};
+    sensors:
+      - name: "Accurite Temperature"
+        unit_of_measurement: "°C"
+        accuracy_decimals: 1
+        device_class: temperature
+      - name: "Accurite Humidity"
+        unit_of_measurement: "%"
+        accuracy_decimals: 1
+        device_class: humidity
+                
